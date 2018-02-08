@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:db="http://www.mulesoft.org/schema/mule/db" xmlns:json="http://www.mulesoft.org/schema/mule/json" xmlns:context="http://www.springframework.org/schema/context" xmlns:tracking="http://www.mulesoft.org/schema/mule/ee/tracking" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:spring="http://www.springframework.org/schema/beans" 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-current.xsd
+http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
+http://www.mulesoft.org/schema/mule/json http://www.mulesoft.org/schema/mule/json/current/mule-json.xsd
+http://www.mulesoft.org/schema/mule/ee/tracking http://www.mulesoft.org/schema/mule/ee/tracking/current/mule-tracking-ee.xsd
+http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-current.xsd">
+    <context:property-placeholder location="football-${env}.properties"/>
+    <db:mysql-config name="MySQL_Configuration" host="${db.host}" port="${db.port}" user="${db.user}" password="${db.pass}" database="${db.database}" doc:name="MySQL Configuration"/>
+    <flow name="getallplayers">
+        <db:select config-ref="MySQL_Configuration" doc:name="Database">
+            <db:parameterized-query><![CDATA[select * from players;]]></db:parameterized-query>
+        </db:select>
+        <json:object-to-json-transformer doc:name="Object to JSON"/>
+    </flow>
+    <flow name="getallteams">
+        <db:select config-ref="MySQL_Configuration" doc:name="Database">
+            <db:parameterized-query><![CDATA[select * from team;]]></db:parameterized-query>
+        </db:select>
+        <json:object-to-json-transformer doc:name="Object to JSON"/>
+    </flow>
+    <flow name="getteambyid">
+        <db:select config-ref="MySQL_Configuration" doc:name="Database">
+            <db:parameterized-query><![CDATA[select * from team where team_id=#[sessionVars.TID];]]></db:parameterized-query>
+        </db:select>
+        <json:object-to-json-transformer doc:name="Object to JSON"/>
+    </flow>
+    <flow name="getplayersbyid">
+        <db:select config-ref="MySQL_Configuration" doc:name="Database">
+            <db:parameterized-query><![CDATA[Select * from players where player_id=#[message.inboundProperties.'http.uri.params'.PID];]]></db:parameterized-query>
+        </db:select>
+        <json:object-to-json-transformer doc:name="Object to JSON"/>
+    </flow>
+    <flow name="deleteteam">
+        <db:delete config-ref="MySQL_Configuration" doc:name="Database">
+            <db:parameterized-query><![CDATA[delete from team where team_id=#[sessionVars.teamid];]]></db:parameterized-query>
+        </db:delete>
+        <set-payload value="successfully deleted" doc:name="Set Payload"/>
+    </flow>
+    <flow name="deleteplayer">
+        <db:delete config-ref="MySQL_Configuration" doc:name="Database">
+            <db:parameterized-query><![CDATA[delete from players where player_id=#[sessionVars.playerid];]]></db:parameterized-query>
+        </db:delete>
+        <set-payload value="successfully deleted player" doc:name="Set Payload"/>
+    </flow>
+    <flow name="updateplayer">
+        <db:update config-ref="MySQL_Configuration" doc:name="Database">
+            <db:parameterized-query><![CDATA[update players set player_name=#[json:player_name],player_age=#[json:player_age],playing_for=#[json:playing_for],
+player_goal=#[json:player_goal],player_appearances=#[json:player_appearances],player_shortName=#[json:player_shortName],player_gear_sponsors=#[json:player_gear_sponsors],player_team_id=#[json:player_team_id] where player_id=#[sessionVars.playerid];]]></db:parameterized-query>
+        </db:update>
+        <db:select config-ref="MySQL_Configuration" doc:name="Database">
+            <db:parameterized-query><![CDATA[select * from players where player_id=#[sessionVars.playerid];]]></db:parameterized-query>
+        </db:select>
+        <json:object-to-json-transformer doc:name="Object to JSON"/>
+    </flow>
+    <flow name="updateteam">
+        <db:update config-ref="MySQL_Configuration" doc:name="Database">
+            <db:parameterized-query><![CDATA[update team set team_name=#[json:team_name],team_Strength=#[json:team_Strength],team_Shortname=#[json:team_Shortname],country=#[json:country] where team_id=#[sessionVars.teamid];]]></db:parameterized-query>
+        </db:update>
+        <db:select config-ref="MySQL_Configuration" doc:name="Database">
+            <db:parameterized-query><![CDATA[select * from team where team_id=#[sessionVars.teamid];]]></db:parameterized-query>
+        </db:select>
+        <json:object-to-json-transformer doc:name="Object to JSON"/>
+    </flow>
+    <flow name="postplayer">
+        <db:insert config-ref="MySQL_Configuration" doc:name="Database">
+            <db:parameterized-query><![CDATA[Insert Into players values(null,#[json:player_name],#[json:player_age],#[json:playing_for],#[json:player_goal],#[json:player_appearances],#[json:player_ShortName],#[json:player_gear_sponsors],#[json:player_team_id]);]]></db:parameterized-query>
+        </db:insert>
+        <set-payload value="successfully posted" doc:name="Set Payload"/>
+        <json:object-to-json-transformer doc:name="Object to JSON"/>
+    </flow>
+    <flow name="postteam">
+        <db:insert config-ref="MySQL_Configuration" doc:name="Database">
+            <db:parameterized-query><![CDATA[Insert Into team values(null,#[json:team_name],#[json:team_Strength],#[json:team_Shortname],null,#[json:country]);]]></db:parameterized-query>
+        </db:insert>
+        <set-payload value="successfully posted" doc:name="Set Payload"/>
+        <json:object-to-json-transformer doc:name="Object to JSON"/>
+    </flow>
+</mule>

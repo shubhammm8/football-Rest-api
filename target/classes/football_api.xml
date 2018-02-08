@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mule xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:apikit="http://www.mulesoft.org/schema/mule/apikit" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:spring="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/apikit http://www.mulesoft.org/schema/mule/apikit/current/mule-apikit.xsd
+http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.1.xsd">
+    <http:listener-config name="football_api-httpListenerConfig" host="0.0.0.0" port="8081" doc:name="HTTP Listener Configuration"/>
+    <apikit:config name="football_api-config" raml="football_api.raml" consoleEnabled="false" doc:name="Router"/>
+    <flow name="football_api-main">
+        <http:listener config-ref="football_api-httpListenerConfig" path="/api/*" doc:name="HTTP"/>
+        <apikit:router config-ref="football_api-config" doc:name="APIkit Router"/>
+        <exception-strategy ref="football_api-apiKitGlobalExceptionMapping" doc:name="Reference Exception Strategy"/>
+    </flow>
+    <flow name="football_api-console">
+        <http:listener config-ref="football_api-httpListenerConfig" path="/console/*" doc:name="HTTP"/>
+        <apikit:console config-ref="football_api-config" doc:name="APIkit Console"/>
+    </flow>
+    <flow name="put:/v1/teams/{ID}:football_api-config">
+        <set-session-variable variableName="teamid" value="#[message.inboundProperties.'http.uri.params'.ID]" doc:name="Session Variable"/>
+        <flow-ref name="updateteam" doc:name="Flow Reference"/>
+
+    </flow>
+    <flow name="put:/v1/players/{PID}:football_api-config">
+        <set-session-variable variableName="playerid" value="#[message.inboundProperties.'http.uri.params'.PID]" doc:name="Session Variable"/>
+        <flow-ref name="updateplayer" doc:name="Flow Reference"/>
+
+    </flow>
+    <flow name="delete:/v1/teams/{ID}:football_api-config">
+        <set-session-variable variableName="teamid" value="#[message.inboundProperties.'http.uri.params'.ID]" doc:name="Session Variable"/>
+        <flow-ref name="deleteteam" doc:name="deleteteam"/>
+
+    </flow>
+    <flow name="delete:/v1/players/{PID}:football_api-config">
+        <set-session-variable variableName="playerid" value="#[message.inboundProperties.'http.uri.params'.PID]" doc:name="Session Variable"/>
+        <flow-ref name="deleteplayer" doc:name="deleteplayer"/>
+
+    </flow>
+    <flow name="get:/v1/players:football_api-config">
+        <flow-ref name="getallplayers" doc:name="getallplayers"/>
+
+    </flow>
+    <flow name="get:/v1/teams:football_api-config">
+        <flow-ref name="getallteams" doc:name="Flow Reference"/>
+
+    </flow>
+    <flow name="get:/v1/teams/{ID}:football_api-config">
+        <set-session-variable variableName="TID" value="#[message.inboundProperties.'http.uri.params'.ID]" doc:name="teamId"/>
+        <flow-ref name="getteambyid" doc:name="getteambyid"/>
+
+    </flow>
+    <flow name="get:/v1/players/{PID}:football_api-config">
+        <set-session-variable variableName="pid" value="#[message.inboundProperties.'http.uri.params'.ID]" doc:name="PlayerId"/>
+        <flow-ref name="getplayersbyid" doc:name="getplayersbyid"/>
+
+    </flow>
+    <flow name="post:/v1/players:football_api-config">
+        <flow-ref name="postplayer" doc:name="postplayer"/>
+
+    </flow>
+    <flow name="post:/v1/teams:football_api-config">
+        <flow-ref name="postteam" doc:name="postteam"/>
+
+    </flow>
+    <apikit:mapping-exception-strategy name="football_api-apiKitGlobalExceptionMapping">
+        <apikit:mapping statusCode="404">
+            <apikit:exception value="org.mule.module.apikit.exception.NotFoundException" />
+            <set-property propertyName="Content-Type" value="application/json" doc:name="Property"/>
+            <set-payload value="{ &quot;message&quot;: &quot;Resource not found&quot; }" doc:name="Set Payload"/>
+        </apikit:mapping>
+        <apikit:mapping statusCode="405">
+            <apikit:exception value="org.mule.module.apikit.exception.MethodNotAllowedException" />
+            <set-property propertyName="Content-Type" value="application/json" doc:name="Property"/>
+            <set-payload value="{ &quot;message&quot;: &quot;Method not allowed&quot; }" doc:name="Set Payload"/>
+        </apikit:mapping>
+        <apikit:mapping statusCode="415">
+            <apikit:exception value="org.mule.module.apikit.exception.UnsupportedMediaTypeException" />
+            <set-property propertyName="Content-Type" value="application/json" doc:name="Property"/>
+            <set-payload value="{ &quot;message&quot;: &quot;Unsupported media type&quot; }" doc:name="Set Payload"/>
+        </apikit:mapping>
+        <apikit:mapping statusCode="406">
+            <apikit:exception value="org.mule.module.apikit.exception.NotAcceptableException" />
+            <set-property propertyName="Content-Type" value="application/json" doc:name="Property"/>
+            <set-payload value="{ &quot;message&quot;: &quot;Not acceptable&quot; }" doc:name="Set Payload"/>
+        </apikit:mapping>
+        <apikit:mapping statusCode="400">
+            <apikit:exception value="org.mule.module.apikit.exception.BadRequestException" />
+            <set-property propertyName="Content-Type" value="application/json" doc:name="Property"/>
+            <set-payload value="{ &quot;message&quot;: &quot;Bad request&quot; }" doc:name="Set Payload"/>
+        </apikit:mapping>
+    </apikit:mapping-exception-strategy>
+</mule>

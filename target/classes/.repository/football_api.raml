@@ -1,0 +1,177 @@
+#%RAML 1.0
+baseUri: https://mocksvc.mulesoft.com/mocks/8dbdcea4-0b19-4a7d-973c-d1b41827dcb2 # 
+title: football_api
+
+/v1:
+  /teams:
+    get:
+      responses: 
+        200:
+          body: 
+            application/json:
+              example: |
+               {
+                 "team_id":1,
+                 "team_name":"team-X",
+                 "team_code":"T-X",
+                 "team_Strength":20,
+                 "team_players":"link"
+
+               }
+    post:
+      body: 
+        application/json:
+          example: |
+           {
+                "team_id":1,
+                 "team_name":"team-X",
+                 "team_code":"T-X",
+                 "team_Strength":20,
+                 "team_players":"link"
+           } 
+        
+      responses:
+        201:
+          body: 
+            application/json:
+              example: |
+                {
+                "response":"added Successfully"
+                }
+    /{ID}:  
+      get:
+        responses: 
+          200:
+            body: 
+              application/json:
+                example: |
+                  {
+                  "team_id":1,
+                  "team_name":"team-X",
+                  "team_code":"T-X",
+                  "team_Strength":20,
+                  "team_players":"link"
+                  }
+      put:
+        body:
+          application/json:
+            example:
+              {
+                 
+                
+                  "team_name":"team-X",
+                  "team_code":"T-X",
+                  "team_Strength":20,
+                  "team_players":"link"
+                  
+              }
+        responses: 
+          200:
+            body: 
+              application/json:
+                example: |
+                  {
+                    "response":"succesfully updated"
+                  } 
+
+      delete:
+        responses: 
+          202:
+            body: 
+              application/json:
+                example: |
+                 {
+                   "response":"successfully deleted"
+          
+                 }
+
+
+  /players:
+    get:
+      responses: 
+        200:
+         body:
+          application/json:
+            example: |
+              {
+                "player_id":1,
+                "player_name":"Lionel Messi",
+                "player_age":30,
+                "playing_for":"barceona",
+                "players_goal":600,
+                "player_appearances":300,
+                "player_shortname":"Messi",
+                "player_gear_sponsors":"Adidas"
+
+
+              }
+    post:
+      body: 
+        application/json:
+          example: | 
+           {
+            "player_id":1,
+                "player_name":"Lionel Messi",
+                "player_age":30,
+                "playing_for":"barceona",
+                "players_goal":600,
+                "player_appearances":300,
+                "player_shortname":"Messi",
+                "player_gear_sponsors":"Adidas"
+           }
+      responses: 
+        201:
+          body: 
+            application/json:
+              example: |
+               {
+                 "response":"successfully created player"
+               }
+    /{PID}:
+      get:
+        body: 
+          application/json:
+            example: | 
+             { 
+                "player_id":"PID",
+                "player_name":"Lionel Messi",
+                "player_age":30,
+                "playing_for":"barceona",
+                "players_goal":600,
+                "player_appearances":300,
+                "player_shortname":"Messi",
+                "player_gear_sponsors":"Adidas"
+             }
+      put:
+        body: 
+          application/json:
+            example: |
+             {   
+
+                "player_name":"Lionel Messi",
+                "player_age":30,
+                "playing_for":"barceona",
+                "players_goal":600,
+                "player_appearances":300,
+                "player_shortname":"Messi",
+                "player_gear_sponsors":"Adidas"
+             }
+        responses: 
+          200:
+            body: 
+              application/json:
+                example: | 
+                  {
+                    "response":"succesfully updated"
+                  }
+      delete:
+        responses:
+          202:
+            body: 
+              application/json:
+                example:
+                 {
+                  "response":"Player deleted Successfully"
+                 } 
+          
+      
